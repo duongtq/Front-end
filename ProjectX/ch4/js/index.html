@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Vue Pet Depot</title>
+  <script src="https://unpkg.com/vue"></script>
+  <link rel="stylesheet" type="text/css" href="../assets/css/app.css"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+  <style type="text/css">
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div>
+      <header>
+        <div class="navbar navbar-default">
+          <div class="navbar-header">
+            <h1 v-text="sitename"></h1>
+          </div>
+          <div class="nav navbar-nav navbar-right cart">
+            <button type="button" class="btn btn-default btn-lg" v-on:click="showCheckout">
+              <span class="glyphicon glyphicon-shopping-cart">{{ cartItemCount }}
+              </span> Checkout
+            </button>
+          </div>
+        </div>
+      </header>
+    </div>
+    <div v-if="showProduct">
+      <div class="row-product">
+        <div class="col-md-2">
+          <figure>
+            <img v-bind:src="product.image" alt="cat picture">
+          </figure>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-6">
+          <h1 v-text="product.title"></h1>
+          <p v-html="product.description"></p>
+          <p class="price">{{ product.price | formatPrice}}</p>
+          <button class="default" v-if="canAddToCart" v-on:click="addToCart">Add to cart</button>
+          <button class="disabled" v-else>Add to cart</button>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+      <div class="col-md-6">
+        <strong>First Name: </strong>
+        <input v-model.trim="order.firstName" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <strong>Last Name: </strong>
+        <input v-model.trim="order.lastName" class="form-control">
+      </div>
+      <div class="col-md-12">
+        <strong>Address: </strong>
+        <input v-model.trim="order.address" class="form-control">
+      </div>
+      <div class="col-md-12">
+        <strong>City: </strong>
+        <input v-model.trim="order.city" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <strong>State: </strong>
+        <select class="form-control" v-model="order.state">
+          <option v-for="state in states" v-bind:value="state" >{{ state }}</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <strong>Zip/Postal Code:</strong>
+        <input v-model.number="order.zip" class="form-control">
+      </div>
+      <div class="col-md-6 boxes">
+        <input type="checkbox" id="gift" value="true"
+          v-bind:true-value="order.sendGift"
+          v-bind:false-value="order.dontSendGift"
+          v-model="order.gift">
+        <label for="gift">Ship As Gift</label>
+      </div>
+      <div class="col-md-6 boxes">
+        <input type="radio" id="home" value="Home" v-bind:value="order.home" v-model="order.method">
+        <label for="home">Home</label>
+        <input type="radio" id="business" value="Business" v-bind:value="order.business" v-model="order.method">
+        <label for="business">Business</label>
+      </div>
+      <div class="col-md-6">
+        <button type="submit" class="btn btn-primary submit" v-on:click="submitForm">
+          Place Order
+        </button>
+      </div>
+      <div class="col-md-12 verify">
+        <pre>
+          First Name: {{ order.firstName }}
+           Last Name: {{ order.lastName }}
+             Address: {{ order.address }}
+                City: {{ order.city }}
+               State: {{ order.state }}
+                 Zip: {{ order.zip }}
+              Method: {{ order.method }}
+                Gift: {{ order.gift }}
+        </pre>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript">
+  var APP_LOG_LIFECYCLE_EVENTS = false;
+
+  var webstore = new Vue({
+    el: "#app",
+    data: {
+      sitename: "Vue Pet Depot",
+      product: {
+        id: 1001,
+        title: "Cat Food, 25lb bag",
+        description: "A 25 pound bag of <em>irresistible</em>, organic goodness for your cat.",
+        price: 20,
+        image: "../assets/images/product-fullsize.png",
+        availableInventory: 5
+      },
+      cart: [],
+      showProduct: true,
+      order: {
+        firstName: '',
+        lastName: '',
+        address: '',
+        city: '',
+        zip: '',
+        method: 'Home Address',
+        home: 'Home Address',
+        business: 'Business Address',
+        gift: 'Send as Gift',
+        sendGift: 'Send as a gift',
+        dontSendGift: 'Do not send as a gift'
+      },
+      states: [
+        'Alabama',
+        'Alaska',
+        'Arizona',
+        'California',
+        'Nevada'
+      ]
+    },
+    filters: {
+      formatPrice: function(price) {
+        if (!parseInt(price)) {
+          return "";
+        }
+        return "$" + price;
+      }
+    },
+    methods: {
+      addToCart: function() {
+        this.cart.push(this.product.id);
+      },
+      showCheckout: function() {
+        this.showProduct = this.showProduct ? false : true;
+      },
+      submitForm: function() {
+        alert("Submitted");
+      }
+    },
+    computed: {
+      cartItemCount: function() {
+        return this.cart.length || '';
+      },
+      canAddToCart: function() {
+        return this.product.availableInventory > this.cartItemCount;
+      }
+    },
+    // LIFECYCLE HOOKS
+    beforeCreate: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("beforeCreate");
+      }
+    },
+    created: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("created");
+      }
+    },
+    beforeMount: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("beforeMount");
+      }
+    },
+    mounted: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("mounted");
+      }
+    },
+    beforeUpdate: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("beforeUpdate");
+      }
+    },
+    updated: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("updated");
+      }
+    },
+    beforeDestroy: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("beforeDestroy");
+      }
+    },
+    destroyed: function() {
+      if (APP_LOG_LIFECYCLE_EVENTS) {
+        console.log("destroyed");
+      }
+    }
+  });
+</script>
+</html>
